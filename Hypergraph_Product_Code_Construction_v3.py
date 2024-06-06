@@ -35,20 +35,21 @@ def biindex_to_index(biindex,num_cols,index_shift=0):
 # This is structured as a list of sets, obtained from the parity check matrix:
 #     The index in the outer-list denotes the check, this index matches the row within the parity check matrix.
 #     The inner-set consists of a set of qubit indices, each matching their column within the parity check matrix.
-# This same function can also be used to construct a lsit of sets of qubit indices matching each adjacent generator index.
+# This same function can also be used to construct a list of sets of qubit indices matching each adjacent generator index.
 # Similarly, using the transpose, a list of check/generator adjacent to each qubit can also be obtained.
 
-# This is essentially an adjaceny list for a bipartite graph.
-# Thus function should be included as part of the utilties?
-# These lists should be part of the HGP class object?
+# This is essentially an adjacency list for a bipartite graph.
+# Should this function be included as part of the utilities?
+# Should these lists be part of the HGP class object?
 
 # Function Inputs:
 # H: a binary matrix (such as a parity check matrix)
 # col_index_shift: an integer used to shift the index of each column; (used in the special case of vertical qubits).
 
-# Function Outputs
-# Adajency_list: a list of sets of column indices denoting those columns which have a non-zero entry in this row.
+# Function Outputs:
+# Adjacency_list: a list of sets of column indices denoting which columns have a non-zero entry in this row.
 
+# Obs: this could probably be simplified by using scipy.sparse. 
 def compute_adjacency_list(H,col_index_shift=0):
     
     num_rows, num_cols = np.shape(H)
@@ -265,11 +266,11 @@ class HGP_code:
     
     def __init__(self, H1, H2):
         
-        # The parity check matrcies of the two classicial codes used in this construction.
+        # The parity check matrices of the two classical codes used in this construction.
         self.H1 = H1
         self.H2 = H2
         
-        # The number of bits and checks from the two classicial codes.
+        # The number of bits and checks from the two classical codes.
         self.n1 = np.shape(H1)[1]   # The number of bits in C1 = number of columns in H1
         self.r1 = np.shape(H1)[0]   # The number of checks in C1 = number of rows in H1
         self.n2 = np.shape(H2)[1]   # The number of bits in C2 = number of columns in H2
@@ -277,6 +278,7 @@ class HGP_code:
         
         self.num_qubits = self.n1*self.n2 + self.r1*self.r2
         
+        # For efficiency purposes, it might be better to use scipy.sparse.kron instead of np.kron, or some other alternative to avoid the zero products computations. 
         # The components of the quantum parity check matrices Hx and Hz.
         self.Hx1 = np.kron(H1, np.eye(self.n2,dtype=int))
         self.Hx2 = np.kron(np.eye(self.r1,dtype=int), np.transpose(H2))
